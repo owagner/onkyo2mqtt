@@ -55,12 +55,16 @@ while True:
 	if msg is not None:
 		try:
 			parsed=eiscp.core.iscp_to_command(msg)
+			# Either part can be a list
+			if isinstance(parsed[1],str):
+				val=parsed[1]
+			else:
+				val=parsed[1][0]
 			if isinstance(parsed[0],str):
-				mqc.publish(topic+parsed[0],parsed[1],qos=1,retain=True)
+				mqc.publish(topic+parsed[0],val,qos=1,retain=True)
 			else:
 				for pp in parsed[0]:
-					mqc.publish(topic+pp,parsed[1],qos=1,retain=True)
+					mqc.publish(topic+pp,val,qos=1,retain=True)
 		except:
-			parsed=None
-		logging.warning("Received %s %s" % (msg,parsed))
+			mqc.publish(topic+msg[:3],msg[3:],qos=1,retain=True)
 			
