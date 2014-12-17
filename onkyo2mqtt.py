@@ -16,9 +16,9 @@ import paho.mqtt.client as mqtt
 import eiscp
 
 parser = argparse.ArgumentParser(description='Bridge between onkyo-eiscp and mqtt')
-parser.add_argument('--mqtt-host', default='localhost')
-parser.add_argument('--mqtt-port', default='1883', type=int)
-parser.add_argument('--mqtt-topic', default='onkyo/')
+parser.add_argument('--mqtt-host', default='localhost', help='MQTT server address. Defaults to "localhost"')
+parser.add_argument('--mqtt-port', default='1883', type=int, help='MQTT server port. Defaults to 1883')
+parser.add_argument('--mqtt-topic', default='onkyo/', help='Topic prefix to be used for subscribing/publishing. Defaults to "onkyo/"')
 parser.add_argument('--onkyo-address', help='IP or hostname of the AVR. Defaults to autodiscover')
 args=parser.parse_args()
 
