@@ -10,15 +10,16 @@
 #
 
 import argparse
+import logging
+import json
 import paho.mqtt.client as mqtt
 import eiscp
-import logging
 
 parser = argparse.ArgumentParser(description='Bridge between onkyo-eiscp and mqtt')
 parser.add_argument('--mqtt-host', default='localhost')
 parser.add_argument('--mqtt-port', default='1883', type=int)
 parser.add_argument('--mqtt-topic', default='onkyo/')
-parser.add_argument('--onkyo-address')
+parser.add_argument('--onkyo-address', help='IP or hostname of the AVR. Defaults to autodiscover')
 args=parser.parse_args()
 
 topic=args.mqtt_topic
@@ -50,6 +51,14 @@ receiver.send("SLIQSTN")
 receiver.send("SLAQSTN")
 receiver.send("LMDQSTN")
 
+def publish(suffix,val,raw):
+	global topic,mqc
+	robj={}
+	robj["val"]=val
+	robj["onkyo_raw"]=raw
+	robj["ack"]=True
+	mqc.publish(topic+suffix,json.dumps(robj),qos=1,retain=True)
+
 while True:
 	msg=receiver.get(3600)
 	if msg is not None:
@@ -61,10 +70,10 @@ while True:
 			else:
 				val=parsed[1][0]
 			if isinstance(parsed[0],str):
-				mqc.publish(topic+parsed[0],val,qos=1,retain=True)
+				publish(parsed[0],val,msg)
 			else:
 				for pp in parsed[0]:
-					mqc.publish(topic+pp,val,qos=1,retain=True)
+					publish(pp,val,msg)
 		except:
-			mqc.publish(topic+msg[:3],msg[3:],qos=1,retain=True)
+			publish(msg[:3],msg[3:],msg)
 			
