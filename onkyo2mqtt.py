@@ -26,9 +26,28 @@ topic=args.mqtt_topic
 if not topic.endswith("/"):
 	topic+="/"
 
+def msghandler(mqc,userdata,msg):
+	try:
+		global topic,receiver
+		if msg.retain:
+			return
+		data=json.loads(msg.payload)
+		if "ack" in data and data["ack"]:
+			return
+		cmd=data["val"]
+		mytopic=msg.topic[len(topic):]
+		if mytopic=="command":
+			receiver.send(cmd)
+		else:
+			llcmd=eiscp.core.command_to_iscp(mytopic+" "+cmd)
+			receiver.send(llcmd)
+	except Exception as e:
+		logging.warning("Error processing message %s" % e)
+
 mqc=mqtt.Client()
 mqc.connect(args.mqtt_host,args.mqtt_port,60)
-mqc.loop_start()
+mqc.subscribe(topic+"#",qos=1)
+mqc.on_message=msghandler
 
 if args.onkyo_address:
 	receiver=eiscp.eISCP(args.onkyo_address)
@@ -50,6 +69,8 @@ receiver.send("MVLQSTN")
 receiver.send("SLIQSTN")
 receiver.send("SLAQSTN")
 receiver.send("LMDQSTN")
+
+mqc.loop_start()
 
 def publish(suffix,val,raw):
 	global topic,mqc
