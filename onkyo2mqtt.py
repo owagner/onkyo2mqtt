@@ -71,10 +71,9 @@ def connecthandler(mqc,userdata,rc):
     mqc.subscribe(topic+"#",qos=1)
 
 def disconnecthandler(mqc,userdata,rc):
-    global args
     logging.warning("Disconnected from MQTT broker with rc=%d" % (rc))
     time.sleep(5)
-    mqc.connect_async(args.mqtt_host,args.mqtt_port,60)
+    mqc.reconnect()
 
 mqc=mqtt.Client()
 mqc.on_message=msghandler
