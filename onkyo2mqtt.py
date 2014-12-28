@@ -18,14 +18,18 @@ import json
 import paho.mqtt.client as mqtt
 import eiscp
 
-version="0.2"
+version="0.3"
 
 parser = argparse.ArgumentParser(description='Bridge between onkyo-eiscp and mqtt')
 parser.add_argument('--mqtt-host', default='localhost', help='MQTT server address. Defaults to "localhost"')
 parser.add_argument('--mqtt-port', default='1883', type=int, help='MQTT server port. Defaults to 1883')
 parser.add_argument('--mqtt-topic', default='onkyo/', help='Topic prefix to be used for subscribing/publishing. Defaults to "onkyo/"')
 parser.add_argument('--onkyo-address', help='IP or hostname of the AVR. Defaults to autodiscover')
+parser.add_argument('--log', help='set log level to the specified value. Defaults to WARNING. Try DEBUG for maximum detail')
 args=parser.parse_args()
+
+if args.log:
+    logging.getLogger().setLevel(args.log)
 
 topic=args.mqtt_topic
 if not topic.endswith("/"):
@@ -62,10 +66,22 @@ def msghandler(mqc,userdata,msg):
 	except Exception as e:
 		logging.warning("Error processing message %s" % e)
 
+def connecthandler(mqc,userdata,rc):
+    logging.info("Connected to MQTT broker with rc=%d" % (rc))
+    mqc.subscribe(topic+"#",qos=1)
+
+def disconnecthandler(mqc,userdata,rc):
+    global args
+    logging.warning("Disconnected from MQTT broker with rc=%d" % (rc))
+    time.sleep(5)
+    mqc.connect_async(args.mqtt_host,args.mqtt_port,60)
+
 mqc=mqtt.Client()
-mqc.connect(args.mqtt_host,args.mqtt_port,60)
-mqc.subscribe(topic+"#",qos=1)
 mqc.on_message=msghandler
+mqc.on_connect=connecthandler
+mqc.on_disconnect=disconnecthandler
+mqc.will_set(topic+"connected","{\"val\": false, \"ack\": true}",retain=True)
+mqc.connect(args.mqtt_host,args.mqtt_port,60)
 
 if args.onkyo_address:
 	receiver=eiscp.eISCP(args.onkyo_address)
@@ -91,9 +107,12 @@ def publish(suffix,val,raw):
 	global topic,mqc
 	robj={}
 	robj["val"]=val
-	robj["onkyo_raw"]=raw
+	if raw is not None:
+	    robj["onkyo_raw"]=raw
 	robj["ack"]=True
 	mqc.publish(topic+suffix,json.dumps(robj),qos=1,retain=True)
+
+publish("connected",True,None)
 
 while True:
 	msg=receiver.get(3600)

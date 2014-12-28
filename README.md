@@ -22,7 +22,7 @@ Prerequisites
 
 * Python 2.7+
 * onkyo-eiscp - https://github.com/miracle2k/onkyo-eiscp (implements
-  the Onkyo EISCP protocol)
+  the Onkyo EISCP protocol and command translation)
 * Eclipse Paho for Python - http://www.eclipse.org/paho/clients/python/
   (used for MQTT communication)
 
@@ -60,6 +60,16 @@ Sending commands is possible in three ways:
 textual command as described in https://github.com/miracle2k/onkyo-eiscp#commands
 3. By publishing a raw EISCP command into the special "\<prefix\>/command" topic
 
+A special topic "\<prefix\>/connected" is maintained. It's a boolean
+stating whether the module is currently running and connected to the broker.
+
+
+Error handling
+--------------
+onkyo2mqtt will terminate when it cannot establish a connection to the AVR,
+or the connection dies for any reason. It will, however, reconnect to
+the MQTT broker without restart.
+
 
 Usage
 -----
@@ -73,9 +83,16 @@ Usage
                         Defaults to "onkyo/"
     --onkyo-address ONKYO_ADDRESS
                         IP or hostname of the AVR. Defaults to autodiscover
+    --log LOG           set log level to the specified value. Defaults to
+                        WARNING. Try DEBUG for maximum detail                        
                         
 Changelog
 ---------
+* 0.3 - 2014/12/28
+  - set <prefix>/connected topic
+  - add new option "--log" to set the log level
+  - implement MQTT-side reconnect handling
+
 * 0.2 - 2014/12/28
   - maintain a minimum of 50ms wait time between commands
-
+  
