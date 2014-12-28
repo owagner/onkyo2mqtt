@@ -3,7 +3,8 @@
 # Allows to remotely control networked Onkyo AVRs and get status
 # information.
 #
-# Written by Oliver Wagner <owagner@tellerulam.com>
+# Written and (C) 2014 by Oliver Wagner <owagner@tellerulam.com>
+# Provided under the terms of the MIT license
 #
 # Requires:
 # - onkyo-eiscp - https://github.com/miracle2k/onkyo-eiscp
@@ -12,9 +13,12 @@
 
 import argparse
 import logging
+import time
 import json
 import paho.mqtt.client as mqtt
 import eiscp
+
+version="0.2"
 
 parser = argparse.ArgumentParser(description='Bridge between onkyo-eiscp and mqtt')
 parser.add_argument('--mqtt-host', default='localhost', help='MQTT server address. Defaults to "localhost"')
@@ -27,9 +31,22 @@ topic=args.mqtt_topic
 if not topic.endswith("/"):
 	topic+="/"
 
+lastSend=0
+
+logging.info('Starting onkyo2mqtt V%s with topic prefix \"%s\"' %(version, topic))
+
+def sendavr(cmd):
+    global lastSend
+    now=time.time()
+    if now-lastSend<0.05:
+        time.sleep(0.05-(now-lastSend))
+    receiver.send(cmd)
+    lastSend=time.time()
+    logging.info("Sent command %s" % (cmd))
+
 def msghandler(mqc,userdata,msg):
 	try:
-		global topic,receiver
+		global topic
 		if msg.retain:
 			return
 		data=json.loads(msg.payload)
@@ -38,10 +55,10 @@ def msghandler(mqc,userdata,msg):
 		cmd=data["val"]
 		mytopic=msg.topic[len(topic):]
 		if mytopic=="command":
-			receiver.send(cmd)
+			sendavr(cmd)
 		else:
 			llcmd=eiscp.core.command_to_iscp(mytopic+" "+cmd)
-			receiver.send(llcmd)
+			sendvar(llcmd)
 	except Exception as e:
 		logging.warning("Error processing message %s" % e)
 
@@ -64,12 +81,9 @@ else:
 	receiver=receivers.pop(0)
 	logging.info('Discovered AVR at %s',receiver)
 
-# Query some initial values
-receiver.send("PWRQSTN")
-receiver.send("MVLQSTN")
-receiver.send("SLIQSTN")
-receiver.send("SLAQSTN")
-receiver.send("LMDQSTN")
+# Query some initial values 
+for icmd in ("PWR","MVL","SLI","SLA","LMD"):
+	sendavr(icmd+"QSTN")
 
 mqc.loop_start()
 

@@ -74,4 +74,8 @@ Usage
     --onkyo-address ONKYO_ADDRESS
                         IP or hostname of the AVR. Defaults to autodiscover
                         
-                        
+Changelog
+---------
+* 0.2 - 2014/12/28
+  - maintain a minimum of 50ms wait time between commands
+
