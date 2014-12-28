@@ -1,12 +1,13 @@
 #
-# Bridge between an Onkyo AVR controlled with the EISCP protocol
-# and MQTT
+# Bridge between the Onkyo AVR EISCP remote control protocol and MQTT.
+# Allows to remotely control networked Onkyo AVRs and get status
+# information.
 #
 # Written by Oliver Wagner <owagner@tellerulam.com>
 #
 # Requires:
 # - onkyo-eiscp - https://github.com/miracle2k/onkyo-eiscp
-# - Eclipse paho for Python - http://www.eclipse.org/paho/clients/python/
+# - Eclipse Paho for Python - http://www.eclipse.org/paho/clients/python/
 #
 
 import argparse
@@ -52,7 +53,7 @@ mqc.on_message=msghandler
 if args.onkyo_address:
 	receiver=eiscp.eISCP(args.onkyo_address)
 else:
-	logging.info('Starting auto-discover of Onkyo AVR')
+	logging.info('Starting auto-discovery of Onkyo AVR')
 	receivers=eiscp.eISCP.discover()
 	if len(receivers)==0:
 		logging.warning("No AVRs discovered")
@@ -85,7 +86,7 @@ while True:
 	if msg is not None:
 		try:
 			parsed=eiscp.core.iscp_to_command(msg)
-			# Either part can be a list
+			# Either part of the parsed command can be a list
 			if isinstance(parsed[1],str):
 				val=parsed[1]
 			else:
