@@ -48,17 +48,17 @@ information about that.
 onkyo2mqtt will translate incoming EISCP status events into their
 textual representation, and publish those via MQTT.
 
-For example, the raw "power is off" status is translated into "system-power"
-as follows:
+For example, the raw "power is off" status is published into 
+the topic "\<prefix\>/system-power" as follows:
 
-    ampkueche/system-power {"onkyo_raw": "PWR00", "ack": true, "val": "standby"}
+    {"onkyo_raw": "PWR00", "ack": true, "val": "standby"}
 
 Sending commands is possible in three ways:
 
 1. By publishing a value into a textual topic with a new value
-2. By publishing into the special topic "<prefix>/command" with a
+2. By publishing into the special topic "\<prefix\>/command" with a
 textual command as described in https://github.com/miracle2k/onkyo-eiscp#commands
-3. By publishing a raw EISCP command into the special "<prefix>/command" topic
+3. By publishing a raw EISCP command into the special "\<prefix\>/command" topic
 
 
 Usage
