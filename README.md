@@ -1,13 +1,12 @@
 onkyo2mqtt
 ==========
 
-  Written and (C) 2014 Oliver Wagner <owagner@tellerulam.com> 
+  Written and (C) 2015 Oliver Wagner <owagner@tellerulam.com> 
   
   Provided under the terms of the MIT license.
 
 Overview
 --------
-  
 Bridge between the Onkyo AVR EISCP remote control protocol and MQTT.
 Allows to remotely control networked Onkyo AVRs and get status
 information.
@@ -19,7 +18,6 @@ https://github.com/mqtt-smarthome for a rationale and architectural overview.
 
 Prerequisites
 -------------
-
 * Python 2.7+
 * onkyo-eiscp - https://github.com/miracle2k/onkyo-eiscp (implements
   the Onkyo EISCP protocol and command translation)
@@ -29,12 +27,9 @@ Prerequisites
 
 MQTT Message format
 --------------------
-
-The message format accepted and generated is a JSON encoded object with the following members:
+The message format generated is a JSON encoded object with the following members:
 
 * val - the actual value
-* ack - when sending messages, onkyo2mqtt sets this to _true_. If this is set to _true_ on incoming messages, they
-  are ignored, to avoid loops.
 * onkyo_raw - the raw EISCP command before parsing by onkyo-eiscp  
 
 
@@ -49,19 +44,20 @@ onkyo2mqtt will translate incoming EISCP status events into their
 textual representation, and publish those via MQTT.
 
 For example, the raw "power is off" status is published into 
-the topic "\<prefix\>/system-power" as follows:
+the topic "\<prefix\>/status/system-power" as follows:
 
-    {"onkyo_raw": "PWR00", "ack": true, "val": "standby"}
+    {"onkyo_raw": "PWR00", "val": "standby"}
 
 Sending commands is possible in three ways:
 
-1. By publishing a value into a textual topic with a new value
+1. By publishing a value into a textual topic ("\<prefix\>/set/\<topic\>") with a new value
 2. By publishing into the special topic "\<prefix\>/command" with a
 textual command as described in https://github.com/miracle2k/onkyo-eiscp#commands
 3. By publishing a raw EISCP command into the special "\<prefix\>/command" topic
 
-A special topic "\<prefix\>/connected" is maintained. It's a boolean
-stating whether the module is currently running and connected to the broker.
+A special topic "\<prefix\>/connected" is maintained. It's a enum
+stating whether the module is currently running and connected to the broker
+and to an AVR.
 
 
 Error handling
@@ -88,6 +84,10 @@ Usage
                         
 Changelog
 ---------
+* 0.4 - 2015/01/25
+  - adapted to new mqtt-smarthome topic hierarchy scheme with set/ and
+    status/ function prefixes, and connected being an enum
+
 * 0.3 - 2014/12/28
   - set <prefix>/connected topic
   - add new option "--log" to set the log level
