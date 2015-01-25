@@ -65,6 +65,7 @@ def msghandler(mqc,userdata,msg):
 def connecthandler(mqc,userdata,rc):
     logging.info("Connected to MQTT broker with rc=%d" % (rc))
     mqc.subscribe(topic+"set/#",qos=0)
+    mqc.subscribe(topic+"command",qos=0)
 
 def disconnecthandler(mqc,userdata,rc):
     logging.warning("Disconnected from MQTT broker with rc=%d" % (rc))
