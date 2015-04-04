@@ -13,23 +13,27 @@
 
 import argparse
 import logging
+import logging.handlers
 import time
 import json
 import paho.mqtt.client as mqtt
 import eiscp
 
-version="0.4"
+version="0.5"
 
-parser = argparse.ArgumentParser(description='Bridge between onkyo-eiscp and mqtt')
+parser = argparse.ArgumentParser(description='Bridge between onkyo-eiscp and MQTT')
 parser.add_argument('--mqtt-host', default='localhost', help='MQTT server address. Defaults to "localhost"')
 parser.add_argument('--mqtt-port', default='1883', type=int, help='MQTT server port. Defaults to 1883')
 parser.add_argument('--mqtt-topic', default='onkyo/', help='Topic prefix to be used for subscribing/publishing. Defaults to "onkyo/"')
 parser.add_argument('--onkyo-address', help='IP or hostname of the AVR. Defaults to autodiscover')
 parser.add_argument('--log', help='set log level to the specified value. Defaults to WARNING. Try DEBUG for maximum detail')
+parser.add_argument('--syslog', action='store_true', help='enable logging to syslog')
 args=parser.parse_args()
 
 if args.log:
     logging.getLogger().setLevel(args.log)
+if args.syslog:
+    logging.getLogger().addHandler(logging.handlers.SysLogHandler())
 
 topic=args.mqtt_topic
 if not topic.endswith("/"):
@@ -70,7 +74,6 @@ def connecthandler(mqc,userdata,rc):
 def disconnecthandler(mqc,userdata,rc):
     logging.warning("Disconnected from MQTT broker with rc=%d" % (rc))
     time.sleep(5)
-    mqc.reconnect()
 
 mqc=mqtt.Client()
 mqc.on_message=msghandler

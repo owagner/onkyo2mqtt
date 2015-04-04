@@ -84,6 +84,11 @@ Usage
                         
 Changelog
 ---------
+* 0.5 - 2015/04/04 - owagner
+  - removed reconnect() call in onDisconnected -- Paho will reconnect on it's own
+  anyway, and an exception during reconnect would actually kill the service
+  thread
+
 * 0.4 - 2015/01/25
   - adapted to new mqtt-smarthome topic hierarchy scheme with set/ and
     status/ function prefixes, and connected being an enum
