@@ -70,6 +70,7 @@ def connecthandler(mqc,userdata,rc):
     logging.info("Connected to MQTT broker with rc=%d" % (rc))
     mqc.subscribe(topic+"set/#",qos=0)
     mqc.subscribe(topic+"command",qos=0)
+    mqc.publish(topic+"connected",2,qos=1,retain=True)
 
 def disconnecthandler(mqc,userdata,rc):
     logging.warning("Disconnected from MQTT broker with rc=%d" % (rc))
@@ -102,7 +103,6 @@ for icmd in ("PWR","MVL","SLI","SLA","LMD"):
 	sendavr(icmd+"QSTN")
 
 mqc.loop_start()
-mqc.publish(topic+"connected",2,qos=1,retain=True)
 
 def publish(suffix,val,raw):
 	global topic,mqc
