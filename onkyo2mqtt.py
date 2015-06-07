@@ -118,7 +118,7 @@ while True:
 		try:
 			parsed=eiscp.core.iscp_to_command(msg)
 			# Either part of the parsed command can be a list
-			if isinstance(parsed[1],str):
+			if isinstance(parsed[1],str) or isinstance(parsed[1],int):
 				val=parsed[1]
 			else:
 				val=parsed[1][0]
