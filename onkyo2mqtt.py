@@ -3,7 +3,7 @@
 # Allows to remotely control networked Onkyo AVRs and get status
 # information.
 #
-# Written and (C) 2015 by Oliver Wagner <owagner@tellerulam.com>
+# Written and (C) 2015-16 by Oliver Wagner <owagner@tellerulam.com>
 # Provided under the terms of the MIT license
 #
 # Requires:
@@ -19,13 +19,14 @@ import json
 import paho.mqtt.client as mqtt
 import eiscp
 
-version="0.5"
+version="0.7"
 
 parser = argparse.ArgumentParser(description='Bridge between onkyo-eiscp and MQTT')
 parser.add_argument('--mqtt-host', default='localhost', help='MQTT server address. Defaults to "localhost"')
 parser.add_argument('--mqtt-port', default='1883', type=int, help='MQTT server port. Defaults to 1883')
 parser.add_argument('--mqtt-topic', default='onkyo/', help='Topic prefix to be used for subscribing/publishing. Defaults to "onkyo/"')
 parser.add_argument('--onkyo-address', help='IP or hostname of the AVR. Defaults to autodiscover')
+parser.add_argument('--onkyo-id', help='Device identifier of AVR to connecct to. Uses autodiscover')
 parser.add_argument('--log', help='set log level to the specified value. Defaults to WARNING. Try DEBUG for maximum detail')
 parser.add_argument('--syslog', action='store_true', help='enable logging to syslog')
 args=parser.parse_args()
@@ -87,13 +88,19 @@ mqc.publish(topic+"connected",1,qos=1,retain=True)
 if args.onkyo_address:
 	receiver=eiscp.eISCP(args.onkyo_address)
 else:
-	logging.info('Starting auto-discovery of Onkyo AVR')
+	logging.info('Starting auto-discovery of Onkyo AVRs')
 	receivers=eiscp.eISCP.discover()
+	for receiver in receivers:
+		logging.info("Disocvered %s at %s:%s with id %s" % (
+			receiver.info['model_name'], receiver.host, receiver.port, receiver.info['identifier']))
+	if args.onkyo_id:
+		receivers=[r for r in receivers
+			if args.onkyo_id in r.info['identifier']]
 	if len(receivers)==0:
-		logging.warning("No AVRs discovered")
+		logging.warning("No specified AVRs discovered")
 		exit(1)
 	elif len(receivers)!=1:
-		logging.warning("More than one AVR discovered, please specify explicitely using --onkyo-address")
+		logging.warning("More than one AVR discovered, please specify explicitely using --onkyo-address or --onkyo-id")
 		exit(1)
 	receiver=receivers.pop(0)
 	logging.info('Discovered AVR at %s',receiver)
