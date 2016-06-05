@@ -89,7 +89,7 @@ Changelog
 * 0.7 - 2016/06/05 - owagner
   - support --onkyo-id
 
-  * 0.6 - 2015/06/07 - owagner
+* 0.6 - 2015/06/07 - owagner
   - deal with onkyo-eiscp returning an int as an argument
 
 * 0.5 - 2015/04/04 - owagner
