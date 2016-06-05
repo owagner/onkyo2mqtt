@@ -1,7 +1,7 @@
 onkyo2mqtt
 ==========
 
-  Written and (C) 2015 Oliver Wagner <owagner@tellerulam.com> 
+  Written and (C) 2015-16 Oliver Wagner <owagner@tellerulam.com> 
   
   Provided under the terms of the MIT license.
 
@@ -79,6 +79,8 @@ Usage
                         Defaults to "onkyo/"
     --onkyo-address ONKYO_ADDRESS
                         IP or hostname of the AVR. Defaults to autodiscover
+	--onkyo-id ID
+						Device identifier of AVR to connecct to. Uses autodiscover
     --log LOG           set log level to the specified value. Defaults to
                         WARNING. Try DEBUG for maximum detail                        
                         
