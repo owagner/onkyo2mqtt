@@ -118,6 +118,7 @@ def publish(suffix,val,raw):
 	if raw is not None:
 	    robj["onkyo_raw"]=raw
 	mqc.publish(topic+"status/"+suffix,json.dumps(robj),qos=0,retain=True)
+	logging.debug('mqtt sent ' + topic + 'status/' + suffix + ': ' + json.dumps(robj))
 
 while True:
 	msg=receiver.get(3600)
