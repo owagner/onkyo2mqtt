@@ -67,7 +67,7 @@ def msghandler(mqc,userdata,msg):
 	except Exception as e:
 		logging.warning("Error processing message %s" % e)
 
-def connecthandler(mqc,userdata,rc):
+def connecthandler(mqc,userdata,flags,rc):
     logging.info("Connected to MQTT broker with rc=%d" % (rc))
     mqc.subscribe(topic+"set/#",qos=0)
     mqc.subscribe(topic+"command",qos=0)
