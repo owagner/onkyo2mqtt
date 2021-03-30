@@ -62,7 +62,7 @@ def msghandler(mqc,userdata,msg):
 		if mytopic=="command":
 			sendavr(msg.payload)
 		elif mytopic[0:4]=="set/":
-			llcmd=eiscp.core.command_to_iscp(mytopic[4:]+" "+msg.payload)
+			llcmd=eiscp.core.command_to_iscp(msg.payload.decode("utf-8"))
 			sendavr(llcmd)
 	except Exception as e:
 		logging.warning("Error processing message %s" % e)
