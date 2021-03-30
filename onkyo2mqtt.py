@@ -62,19 +62,19 @@ def msghandler(mqc,userdata,msg):
 		if mytopic=="command":
 			sendavr(msg.payload)
 		elif mytopic[0:4]=="set/":
-			llcmd=eiscp.core.command_to_iscp(mytopic[4:]+" "+msg.payload)
+			llcmd=eiscp.core.command_to_iscp(msg.payload.decode("utf-8"))
 			sendavr(llcmd)
 	except Exception as e:
 		logging.warning("Error processing message %s" % e)
 
-def connecthandler(mqc,userdata,rc):
-    logging.info("Connected to MQTT broker with rc=%d" % (rc))
+def connecthandler(mqc,userdata,rc,properties=None):
+    logging.info("Connected to MQTT broker with rc=%s" % (rc))
     mqc.subscribe(topic+"set/#",qos=0)
     mqc.subscribe(topic+"command",qos=0)
     mqc.publish(topic+"connected",2,qos=1,retain=True)
 
 def disconnecthandler(mqc,userdata,rc):
-    logging.warning("Disconnected from MQTT broker with rc=%d" % (rc))
+    logging.warning("Disconnected from MQTT broker with rc=%s" % (rc))
     time.sleep(5)
 
 mqc=mqtt.Client()
